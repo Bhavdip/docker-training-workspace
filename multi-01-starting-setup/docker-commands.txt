@@ -1,0 +1,62 @@
+-----------
+create network
+-----------
+docker network create goal-network
+
+-----------
+create volume
+-----------
+docker volume create goal-database
+
+----------------------------------------
+RUN MongoDB Container: mongodb
+----------------------------------------
+docker run --name mongodb \
+    -d \
+    --rm \
+    -p 27017:27017 \
+    -v goal-database:/data/db \
+    -e MONGO_INITDB_ROOT_USERNAME=root \
+    -e MONGO_INITDB_ROOT_PASSWORD=secret \
+    --network goal-network
+    mongo
+
+-----------
+create volume
+------------
+docker volume create logs
+
+-----------
+Build Node API Server Image
+-----------
+docker build -t img-goal-api server .
+
+----------------------------------------
+RUN Node API Container: goal-api-server
+----------------------------------------
+docker run --name goal-api-server \
+    -d \
+    --rm \
+    -p 80:80 \
+    --network goal-network \
+    -v "/Users/bhavdip/Documents/Docker&Kubernets-Workspace/multi-01-starting-setup/backend":/app \
+    -v logs:/app/logs \
+    -v/app/node_modules
+    -e MONGO_DB_USERNAME=root \
+    img-goal-api-server
+
+
+-----------
+Build Front end React APP Image
+-----------
+docker build -t img-goal-react-app .
+
+----------------------------------------
+RUN front end react single page container: goal-react-app
+----------------------------------------
+docker run --name goal-react-app \
+    -d \
+    --rm \
+    -p 3000:3000 \
+    -v "/Users/bhavdip/Documents/Docker&Kubernets-Workspace/multi-01-starting-setup/frontend/src":/app/src \
+    img-goal-react-app

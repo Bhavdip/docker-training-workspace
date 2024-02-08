@@ -1,0 +1,13 @@
+version: "3.8"
+# As of now we have single container service
+services:
+  node-util:
+    # Use build key to generate the cutom image based on dockerfile
+    build: ./
+    # stdin enable interactive mode which open the input stream
+    stdin_open: true
+    # then to write/input on terminal enable tty
+    tty: true
+    volumes:
+      # bind mount /app directory inside container with our local host filesystem
+      - ./:/app

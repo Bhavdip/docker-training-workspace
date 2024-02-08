@@ -1,0 +1,54 @@
+version: "3.8"
+services:
+  #below are three label for containers to give container name
+  mongodb:
+    #config options belong to mongodb container
+    image: "mongo"
+    ports:
+      - '27017:27017'
+    volumes:
+      #below is list type should allow only string value
+      - goal-database:/data/db
+    # environment:
+    #   MONGO_INITDB_ROOT_USERNAME: root
+    #   MONGO_INITDB_ROOT_PASSWORD: secret
+    #   - MONGO_INITDB_ROOT_USERNAME=root
+    #   - MONGO_INITDB_ROOT_PASSWORD=secret
+    env_file:
+      # listout all environments file
+      - ./env/mongo.env
+  backend:
+    #config option belongs to backend container
+    # build:
+    #   context: ./backend
+    #   dockerfile: dockerfile-dev
+    build: ./backend
+    ports:
+      - '80:80'
+    volumes:
+      # named volumes
+      - logs:/app/logs
+      # bind mount /app directy on local host file system
+      - ./backend:/app
+      # Anonymous volumes
+      - /app/node_modules
+    env_file:
+      # listout all environments file
+      - ./env/backend.env
+    depends_on:
+      - mongodb
+  frontend:
+    #config option belongs to front container
+    build: ./frontend
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./frontend/src:/app/src
+    depends_on:
+      - backend
+
+# all named volumes that being used by all services
+# must declar here at sevices level
+volumes:
+  goal-database:
+  logs:
